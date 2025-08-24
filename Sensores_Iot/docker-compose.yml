@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Broker MQTT
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    container_name: iot-mqtt-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto:/mosquitto/config
+    networks:
+      - iot-network
+
+  # Backend (FastAPI + CoAP)
+  backend:
+    build: ./Iot-A5/
+    container_name: iot-backend
+    ports:
+      - "8000:8000"
+      - "5683:5683/udp"
+    environment:
+      - MQTT_BROKER_HOST=mqtt-broker
+      - MQTT_BROKER_PORT=1883
+      - AES_KEY=${AES_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - mqtt-broker
+    networks:
+      - iot-network
+    restart: unless-stopped
+    command: ["/app/wait-for-mosquitto.sh", "mqtt-broker", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  # Frontend (Nginx)
+  frontend:
+    build: ./Iot-A5/frontend
+    container_name: iot-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - iot-network
+    restart: unless-stopped
+
+networks:
+  iot-network:
+    driver: bridge
