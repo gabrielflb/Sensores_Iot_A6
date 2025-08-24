@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Broker MQTT
   mqtt-broker:
@@ -14,8 +12,8 @@ services:
 
   # Backend (FastAPI + CoAP)
   backend:
-    build: ./Iot-A5/
-    container_name: iot-backend
+    build: ./Iot-A6/ # <-- CORRIGIDO
+    container_name: iot6-backend
     ports:
       - "8000:8000"
       - "5683:5683/udp"
@@ -33,8 +31,8 @@ services:
 
   # Frontend (Nginx)
   frontend:
-    build: ./Iot-A5/frontend
-    container_name: iot-frontend
+    build: ./Iot-A6/frontend # <-- CORRIGIDO
+    container_name: iot6-frontend
     ports:
       - "80:80"
     depends_on:

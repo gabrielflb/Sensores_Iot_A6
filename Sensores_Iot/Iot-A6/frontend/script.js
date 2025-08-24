@@ -48,9 +48,24 @@ fetch(`http://localhost:8000/token?user=${USER}`)
 
     ws.onmessage = (evt) => {
       const msg = JSON.parse(evt.data);
-      const payload = msg.payload;
-      if (payload && payload.sensor === sensor) {
-        pushPoint(payload.value);
+
+      if (msg.type === "ALERTA_SEGURANCA") {
+        console.warn("ALERTA DE SEGURANÇA RECEBIDO:", msg);
+        const alertsList = document.getElementById("alerts-list");
+        const alertElement = document.createElement("div");
+        alertElement.className = "alert-item";
+        
+        const timestamp = new Date().toLocaleString();
+        
+        alertElement.innerHTML = `<strong>[${timestamp}]</strong> Ataque Detectado: <em>${msg.attack}</em> no tópico "${msg.topic}".`;
+        
+        alertsList.prepend(alertElement);
+
+      } else {
+        const payload = msg.payload;
+        if (payload && payload.sensor === sensor) {
+          pushPoint(payload.value);
+        }
       }
     };
   })

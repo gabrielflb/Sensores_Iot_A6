@@ -2,12 +2,24 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Sensor Temperura</title>
+  <title>Sensor Temperatura</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; }
+    .alerts { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background-color: #f8f8f8; }
+    .alerts h3 { color: #d9534f; }
+    .alert-item { border-bottom: 1px solid #eee; padding: 5px; font-size: 0.9em; color: #c0392b; }
+  </style>
 </head>
 <body>
   <h2>Painel IoT (Temperatura)</h2>
   <canvas id="chartTemp" width="800" height="300"></canvas>
+  
+  <div class="alerts">
+    <h3>Alertas de Segurança</h3>
+    <div id="alerts-list"></div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

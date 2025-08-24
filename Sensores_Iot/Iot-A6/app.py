@@ -105,8 +105,28 @@ def message(client, userdata, msg):
     try:
         data = decrypt_payload(encrypted_b64)
     except Exception as e:
-        print(f"[MQTT] Falha ao descriptografar mensagem do tópico {msg.topic}: {e}")
-        return
+        try:
+            plain_data = json.loads(encrypted_b64)
+            attack_info = {
+                "type": "ALERTA_SEGURANCA",
+                "attack": "Dados em Texto Plano Recebidos",
+                "topic": msg.topic,
+                "source_ip": client._client_id.decode() if isinstance(client._client_id, bytes) else str(client._client_id),
+                "payload": plain_data
+            }
+            print(f"\n[ALERTA] ATAQUE DETECTADO: {attack_info['attack']} no tópico {msg.topic}\n")
+            
+            if ASYNCIO_LOOP:
+                asyncio.run_coroutine_threadsafe(broadcast(json.dumps(attack_info)), ASYNCIO_LOOP)
+            return 
+
+        except json.JSONDecodeError:
+            print(f"[MQTT] Falha ao descriptografar MENSAGEM MALFORMADA do tópico {msg.topic}: {e}")
+            return
+        except Exception as ex:
+            print(f"[MQTT] Erro inesperado ao lidar com falha de descriptografia: {ex}")
+            return
+
 
     package = {"topic": msg.topic, "payload": data}
     print("[MQTT] Enviando para WS:", json.dumps(package))
